@@ -51,3 +51,7 @@ You MUST indicate the beginning and the end of the tool request with <tool_reque
 }}
 {TOOL_END_TAG}
 """
+
+TOOL_RESULT_PROMPT_TEMPLATE = """
+The tool results are as follows:
+"""
