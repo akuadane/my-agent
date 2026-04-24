@@ -17,7 +17,8 @@ class ToolParameter(ABC):
             f"  type: {self.type}\n"
             f"  required: {required}"
         )
-        
+
+
 class Tool(ABC):
     def __init__(self, name: str, description: str, parameters: list[ToolParameter]):
         self.name = name
@@ -38,5 +39,3 @@ class Tool(ABC):
     @abstractmethod
     def execute(self, **kwargs) -> Any:
         pass
-
-
