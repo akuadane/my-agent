@@ -1,4 +1,5 @@
 from src.agent_core.tools.base import Tool
+from src.agent_core.tools.add_numbers import AddNumbersTool
 from src.agent_core.tools.browser import BrowserTool
 
 
@@ -7,5 +8,7 @@ class ToolsFactory:
     def get_tool(tool_name: str) -> Tool:
         if tool_name == "browser":
             return BrowserTool()
+        if tool_name == "add_numbers":
+            return AddNumbersTool()
         else:
             raise ValueError(f"Tool {tool_name} not found")
