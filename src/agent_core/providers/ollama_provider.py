@@ -3,12 +3,13 @@ from typing import Any
 from llmx import TextGenerationConfig, TextGenerationResponse, Message
 import requests
 
+
 class OllamaProvider(BaseProvider):
     def __init__(self, model: str, base_url: str = "http://localhost:11434"):
         super().__init__(provider_type="ollama", model_name=model)
         self.base_url = base_url
         self.model = model
-    
+
     def generate(
         self,
         messages: list[dict[str, Any]],
@@ -18,7 +19,7 @@ class OllamaProvider(BaseProvider):
             "model": self.model,
             "messages": messages,
             # "config": config.model_dump(),
-            "stream": False
+            "stream": False,
         }
         response = requests.post(f"{self.base_url}/api/chat", json=payload)
         data = response.json()
