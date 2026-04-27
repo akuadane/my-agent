@@ -37,6 +37,7 @@ You should display the tool name and the parramters in a json format.
 
 You MUST indicate the beginning and the end of the tool request with <tool_request> and </tool_request>.
 
+You can also use multiple tools in the same request. 
 {TOOL_BEGIN_TAG}
 {{
   "tools": [
@@ -45,6 +46,13 @@ You MUST indicate the beginning and the end of the tool request with <tool_reque
       "parameters": {{
         "url": "https://www.google.com",
         "query": "What is the latest news in ethiopia?"
+      }}
+    }},
+    {{
+      "tool": "add_numbers",
+      "parameters": {{
+        "a": 1,
+        "b": 2
       }}
     }}
   ]

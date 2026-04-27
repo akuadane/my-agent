@@ -13,15 +13,16 @@ class State:
 
 def run_agent(context: Context, provider: BaseProvider) -> str:
     state = State(context, provider)
-
+    
 
     while state.continue_running:
         response = state.provider.generate(state.context.get_messages(),None)
         output = response.text[0].content
+        state.context.add_assistant_message(output)
+        print("Thinking: ", response.response['message']['thinking'])
         print("Output: ", output)
         tools = get_tool_from_response(output)
         
-        print("Output: ", output)
         print("Tools: ", tools)
 
         if tools:
@@ -30,7 +31,6 @@ def run_agent(context: Context, provider: BaseProvider) -> str:
             state.context.add_multiple_tool_messages(tool_results)
 
         else:
-            state.context.add_assistant_message(output)
             state.continue_running = False
     
     return state.context.messages
