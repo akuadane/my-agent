@@ -7,21 +7,27 @@ from src.agent_core.providers.ollama_provider import OllamaProvider
 from src.agent_core.main_loop import run_agent
 
 
-
 def main():
     add_numbers_tool = AddNumbersTool()
     files_tool = FilesTool()
-    system_prompt = compose_prompt([MAIN_SYSTEM_PROMPT, 
-                                    get_tool_prompt([add_numbers_tool, files_tool]),])
+    system_prompt = compose_prompt(
+        [MAIN_SYSTEM_PROMPT, get_tool_prompt([add_numbers_tool, files_tool])]
+    )
+    print(system_prompt)
     context = Context(system_prompt)
 
     while True:
         user_input = input("> ")
-        if user_input.lower() == "exit" or user_input.lower() == "quit" or user_input.lower() == "q":
+        if (
+            user_input.lower() == "exit"
+            or user_input.lower() == "quit"
+            or user_input.lower() == "q"
+        ):
             break
         context.add_user_message(user_input)
-        response = run_agent(context, OllamaProvider(model="qwen3.5:4b"))
+        run_agent(context, OllamaProvider(model="qwen3.5:4b"))
         # print(response)
+
 
 if __name__ == "__main__":
     main()

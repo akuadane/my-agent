@@ -1,0 +1,19 @@
+{
+  "input": "<tool_request>{\"tools\":[{\"tool\":\"browser\",\"parameters\":{\"url\":\"https://www.google.com\",\"query\":\"What is the latest news in ethiopia?\"}},{\"tool\":\"add_numbers\",\"parameters\":{\"a\":1,\"b\":2}}]}</tool_request>",
+  "output": [
+    {
+      "tool": "browser",
+      "parameters": {
+        "url": "https://www.google.com",
+        "query": "What is the latest news in ethiopia?"
+      }
+    },
+    {
+      "tool": "add_numbers",
+      "parameters": {
+        "a": 1,
+        "b": 2
+      }
+    }
+  ]
+}

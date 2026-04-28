@@ -4,7 +4,8 @@ from src.agent_core.providers.base import BaseProvider
 from src.agent_core.tools.executor import sequential_executor
 from src.agent_core.prompts.prompts import TOOL_RESULT_PROMPT_TEMPLATE
 
-class State: 
+
+class State:
     def __init__(self, context: Context, provider: BaseProvider):
         self.context = context
         self.provider = provider
@@ -13,16 +14,15 @@ class State:
 
 def run_agent(context: Context, provider: BaseProvider) -> str:
     state = State(context, provider)
-    
 
     while state.continue_running:
-        response = state.provider.generate(state.context.get_messages(),None)
+        response = state.provider.generate(state.context.get_messages(), None)
         output = response.text[0].content
         state.context.add_assistant_message(output)
-        print("Thinking: ", response.response['message']['thinking'])
+        print("Thinking: ", response.response["message"]["thinking"])
         print("Output: ", output)
         tools = get_tool_from_response(output)
-        
+
         print("Tools: ", tools)
 
         if tools:
@@ -32,5 +32,5 @@ def run_agent(context: Context, provider: BaseProvider) -> str:
 
         else:
             state.continue_running = False
-    
+
     return state.context.messages

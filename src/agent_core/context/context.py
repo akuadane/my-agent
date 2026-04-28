@@ -1,5 +1,6 @@
 from llmx import Message
 
+
 class Context:
     def __init__(self, system_message: str):
         self.messages = []
@@ -20,5 +21,9 @@ class Context:
     def add_multiple_tool_messages(self, messages: list[Message]):
         for message in messages:
             self.add_tool_message(message)
+
     def get_messages(self) -> list[Message]:
-        return [{'role': message.role, 'content': message.content} for message in self.messages]
+        return [
+            {"role": message.role, "content": message.content}
+            for message in self.messages
+        ]

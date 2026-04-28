@@ -68,7 +68,7 @@ class FilesTool(Tool):
             full_entry_path = os.path.join(directory_path, entry)
             suffix = "/" if os.path.isdir(full_entry_path) else ""
             formatted_entries.append(f"{entry}{suffix}")
-
+        print("\n".join(formatted_entries))
         return "\n".join(formatted_entries)
 
     def _read_file(self, file_path: str) -> str:
@@ -85,4 +85,5 @@ class FilesTool(Tool):
                 f"[Output truncated to {self._max_read_chars} characters]"
             )
 
+        print(contents)
         return contents

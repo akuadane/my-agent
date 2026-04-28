@@ -12,10 +12,10 @@ class ToolParameter(ABC):
     def __str__(self) -> str:
         required = str(self.required).lower()
         return (
-            f"- name: {self.name}\n"
-            f"  description: {self.description}\n"
-            f"  type: {self.type}\n"
-            f"  required: {required}"
+            f"\tname: {self.name}\n"
+            f"\tdescription: {self.description}\n"
+            f"\ttype: {self.type}\n"
+            f"\trequired: {required}\n"
         )
 
 
@@ -30,10 +30,10 @@ class Tool(ABC):
             str(parameter).replace("\n", "\n    ") for parameter in self.parameters
         )
         return (
-            f"- name: {self.name}\n"
-            f"  description: {self.description}\n"
+            f"- tool name: {self.name}\n"
+            f"  tool description: {self.description}\n"
             f"  parameters:\n"
-            f"    {parameters}"
+            f"  {parameters}"
         )
 
     @abstractmethod

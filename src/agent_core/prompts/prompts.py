@@ -10,7 +10,9 @@ If you need to use a tool, you should display the tool name and the parramters i
 
 You MUST indicate the beginning and the end of the tool request with <tool_request> and </tool_request>.
 
-<tool_request>
+If multiple tools are needed and can be used in the same request, you MUST mention multiple tools in the same request.
+
+{TOOL_BEGIN_TAG}
 {{
   "tools": [
     {{
@@ -19,12 +21,17 @@ You MUST indicate the beginning and the end of the tool request with <tool_reque
         "url": "https://www.google.com",
         "query": "What is the latest news in ethiopia?"
       }}
+    }},
+    {{
+      "tool": "add_numbers",
+      "parameters": {{
+        "a": 1,
+        "b": 2
+      }}
     }}
   ]
 }}
-</tool_request>
-
-If you need multiple tools, you should display the tools in a list. You are allowed to call a tool more than once.
+{TOOL_END_TAG}
 
 
 You have the following tools available to you:
