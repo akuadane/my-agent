@@ -35,7 +35,9 @@ def list_directory(path: str) -> str:
     if not os.path.isdir(abs_path):
         return f"Not a directory: {abs_path}"
 
-    entries = sorted(entry for entry in os.listdir(abs_path) if not entry.startswith("."))
+    entries = sorted(
+        entry for entry in os.listdir(abs_path) if not entry.startswith(".")
+    )
     if not entries:
         return f"Directory is empty: {abs_path}"
 

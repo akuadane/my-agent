@@ -2,22 +2,22 @@ from enum import Enum
 import inspect
 from typing import Callable, Any
 
+
 class ToolPermission(Enum):
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
 
-class Tool: 
+
+class Tool:
     def __init__(self, function: Callable, permission: ToolPermission):
         self.name = function.__name__
         self.function = function
         self.permission = permission
-    
 
     def execute(self, **kwargs) -> Any:
         return self.function(**kwargs)
 
-   
     def to_json(self) -> dict:
         signature = inspect.signature(self.function)
         properties = {}
