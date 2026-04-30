@@ -1,6 +1,6 @@
 from llmx import Message
 
-from src.agent_core.providers.base import AssistantMessageStream, ToolResultMessage
+from src.agent_core.providers.base import AssistantMessage, ToolResultMessage
 
 
 class Context:
@@ -14,7 +14,7 @@ class Context:
     def add_user_message(self, message: str):
         self.messages.append(Message(role="user", content=message))
 
-    def add_assistant_message(self, message: AssistantMessageStream):
+    def add_assistant_message(self, message: AssistantMessage):
         self.messages.append(message)
 
     def add_tool_message(self, message: ToolResultMessage):

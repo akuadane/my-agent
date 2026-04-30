@@ -30,7 +30,7 @@ def main():
             break
         context.add_user_message(user_input)
         showing_thinking = False
-        for response in run_agent(context, OllamaProvider(model="qwen3.5:4b"), tools):
+        for response in run_agent(context, OllamaProvider(model="gemma4:e2b"), tools):
             if response.thinking:
                 print(
                     Fore.YELLOW + "\rThinking ... " + Style.RESET_ALL,

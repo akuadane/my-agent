@@ -1,7 +1,7 @@
 from src.agent_core.context.context import Context
 from src.agent_core.providers.base import BaseProvider
 from src.agent_core.tools.executor import sequential_executor
-from src.agent_core.providers.base import AssistantMessageStream
+from src.agent_core.providers.base import AssistantMessage
 from src.agent_core.tools.tool import Tool
 
 from typing import Generator
@@ -19,7 +19,7 @@ class State:
 
 def run_agent(
     context: Context, provider: BaseProvider, tools: list[Tool]
-) -> Generator[AssistantMessageStream, None, None]:
+) -> Generator[AssistantMessage, None, None]:
     state = State(context, provider, tools)
 
     while state.continue_running:
@@ -32,8 +32,8 @@ def run_agent(
             if response.tool_calls and not response.done:
                 tools_called.append(
                     (
-                        state.tools_map[response.tool_calls[0].name],
-                        response.tool_calls[0].arguments,
+                        state.tools_map[response.tool_calls[0]["function"]["name"]],
+                        response.tool_calls[0]["function"]["arguments"],
                     )
                 )
 

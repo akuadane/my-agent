@@ -3,7 +3,7 @@ from typing import Any
 from llmx import TextGenerationConfig
 import requests
 from typing import Generator
-from src.agent_core.providers.base import AssistantMessageStream, ToolCall
+from src.agent_core.providers.base import AssistantMessage
 import json
 
 
@@ -18,7 +18,7 @@ class OllamaProvider(BaseProvider):
         messages: list[dict[str, Any]],
         config: TextGenerationConfig,
         tools: list[dict[str, Any]],
-    ) -> Generator[AssistantMessageStream, None, None]:
+    ) -> Generator[AssistantMessage, None, None]:
         payload = {
             "model": self.model,
             "messages": messages,
@@ -41,19 +41,20 @@ class OllamaProvider(BaseProvider):
                 thinking_content += message.get("thinking", "")
                 function_call = message.get("tool_calls", None)
                 tool_call = []
-
                 if function_call:
+                    function_data = function_call[0].get("function", {})
                     tool_call = [
-                        ToolCall(
-                            index=function_call[0].get("function", {}).get("index"),
-                            name=function_call[0].get("function", {}).get("name"),
-                            arguments=function_call[0]
-                            .get("function", {})
-                            .get("arguments"),
-                        )
+                        {
+                            "type": "function",
+                            "function": {
+                                "index": function_call[0].get("index", 0),
+                                "name": function_data.get("name", ""),
+                                "arguments": function_data.get("arguments", {}),
+                            },
+                        }
                     ]
                     final_tool_calls.extend(tool_call)
-                yield AssistantMessageStream(
+                yield AssistantMessage(
                     content=message.get("content", ""),
                     thinking=message.get("thinking", ""),
                     tool_calls=tool_call,
@@ -63,7 +64,7 @@ class OllamaProvider(BaseProvider):
                 prev_chunk += chunk
                 continue
 
-        yield AssistantMessageStream(
+        yield AssistantMessage(
             content=assistant_content,
             thinking=thinking_content,
             tool_calls=final_tool_calls,
