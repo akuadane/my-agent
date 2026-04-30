@@ -3,24 +3,35 @@ from src.agent_core.context.context import Context
 from src.agent_core.providers.base import BaseProvider
 from src.agent_core.tools.executor import sequential_executor
 from src.agent_core.prompts.prompts import TOOL_RESULT_PROMPT_TEMPLATE
+from src.agent_core.providers.base import AssistantMessageStream
+from src.agent_core.tools.tool import Tool
+
+from typing import Generator
+
 
 
 class State:
-    def __init__(self, context: Context, provider: BaseProvider):
+    def __init__(self, context: Context, provider: BaseProvider, tools: list[Tool]):
         self.context = context
         self.provider = provider
+        self.tools = tools
+        self.tools_json = [tool.to_json() for tool in tools]
         self.continue_running = True
 
 
-def run_agent(context: Context, provider: BaseProvider) -> str:
-    state = State(context, provider)
+def run_agent(context: Context, provider: BaseProvider, tools: list[Tool]) -> Generator[AssistantMessageStream, None, None]:
+    state = State(context, provider, tools)
 
     while state.continue_running:
-        response = state.provider.generate(state.context.get_messages(), None)
-        output = response.text[0].content
-        state.context.add_assistant_message(output)
-        print("Thinking: ", response.response["message"]["thinking"])
-        print("Output: ", output)
+        for response in state.provider.generate(state.context.get_messages(), None, state.tools_json):
+            if not response.done:
+                yield response
+            # print("Response: ", response)
+            if response.tool_calls:
+                print("Tool calls: ", response.tool_calls)
+
+        output = response.content
+        state.context.add_assistant_message(response)
         tools = get_tool_from_response(output)
 
         print("Tools: ", tools)

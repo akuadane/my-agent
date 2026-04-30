@@ -1,4 +1,4 @@
-from src.agent_core.tools.base import Tool
+from src.agent_core.tools.tool import Tool
 
 
 def sequential_executor(tools: list[(Tool, dict)]) -> list[str]:

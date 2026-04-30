@@ -19,6 +19,7 @@ def get_tool_from_response(response: str) -> list[(Tool, dict)]:
 
 def json_to_tools(json_str: dict) -> list[Tool]:
     tools = []
+    print("JSON String: ", json_str)
     for tool in json_str["tools"]:
         tools.append((ToolsFactory.get_tool(tool["tool"]), tool["parameters"]))
     return tools
