@@ -19,7 +19,7 @@ def main():
     system_prompt = compose_prompt([MAIN_SYSTEM_PROMPT])
     print(system_prompt)
     context = Context(system_prompt)
-
+    ollama_provider = OllamaProvider(model="gemma4:e2b")
     while True:
         user_input = input("> ")
         if (
@@ -30,7 +30,7 @@ def main():
             break
         context.add_user_message(user_input)
         showing_thinking = False
-        for response in run_agent(context, OllamaProvider(model="gemma4:e2b"), tools):
+        for response in run_agent(context, ollama_provider, tools):
             if response.thinking:
                 print(
                     Fore.YELLOW + "\rThinking ... " + Style.RESET_ALL,
