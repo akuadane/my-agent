@@ -1,6 +1,6 @@
 from typing import Literal
 
-from colorama import Fore, Style
+from colorama import Fore
 
 from src.agent_core.prompts.composer import compose_prompt
 from src.agent_core.prompts.prompts import MAIN_SYSTEM_PROMPT
@@ -32,9 +32,7 @@ class TicTacToe:
                 v = self._board[r][c]
                 cells.append(v if v is not None else " ")
             lines.append(" " + " | ".join(cells) + " ")
-        return "\n".join(
-            [lines[0], "---+---+---", lines[1], "---+---+---", lines[2]]
-        )
+        return "\n".join([lines[0], "---+---+---", lines[1], "---+---+---", lines[2]])
 
     def display(self) -> None:
         """Print the board to stdout."""
@@ -102,38 +100,44 @@ def play_game():
     The board is as follows:
     {game}
     """
-    system_prompt = compose_prompt([MAIN_SYSTEM_PROMPT, GAME_SYSTEM_PROMPT.format(game=game)])
-    
-   
+    system_prompt = compose_prompt(
+        [MAIN_SYSTEM_PROMPT, GAME_SYSTEM_PROMPT.format(game=game)]
+    )
+
     user_prompt = "Your turn."
     context = Context(system_prompt)
     context.add_user_message(user_prompt)
     tools = [Tool(function=game.move, permission=ToolPermission.LOW)]
-     
-    ollama_provider = OllamaProvider(model="qwen3.5:4b")
+
+    ollama_provider = OllamaProvider(model="gemma4:e2b")
     while game.winner() is None and not game.is_draw():
         game.display()
         if game.current_player == "O":
             user_input = input("> ")
-            if user_input.lower() == "exit" or user_input.lower() == "quit" or user_input.lower() == "q":
+            if (
+                user_input.lower() == "exit"
+                or user_input.lower() == "quit"
+                or user_input.lower() == "q"
+            ):
                 break
             user_move = user_input.split(" ")
             game.move(int(user_move[0]), int(user_move[1]), "O")
-            context.add_user_message(f"User moved to row {user_move[0]}, column {user_move[1]}, sign O")
+            context.add_user_message(
+                f"User moved to row {user_move[0]}, column {user_move[1]}, sign O"
+            )
             context.add_system_message(f"The board is as follows: {str(game)}")
-           
+
         else:
             showing_thinking = False
             showing_content = False
             for response in run_agent(context, ollama_provider, tools):
-                
                 if response.thinking:
                     if not showing_thinking:
-                        print( Fore.YELLOW + "Thinking ... ", end="", flush=True)
+                        print(Fore.YELLOW + "Thinking ... ", end="", flush=True)
                         showing_thinking = True
-                    
+
                     print(Fore.YELLOW + response.thinking, end="", flush=True)
-                    
+
                 if response.content:
                     if not showing_content:
                         print("\n")
@@ -141,7 +145,9 @@ def play_game():
                         showing_content = True
                     print(Fore.GREEN + response.content, end="", flush=True)
                     showing_thinking = False
-        
+
         print(Fore.RESET + "\n")
+
+
 if __name__ == "__main__":
     play_game()
