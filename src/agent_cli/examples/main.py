@@ -6,12 +6,13 @@ from src.agent_core.main_loop import run_agent
 from src.agent_core.tools.tool import Tool, ToolPermission
 from src.agent_tools.tools import add_numbers, read_file, list_directory
 from colorama import Fore, Style, init
+from src.agent_cli.policy import ask_tool_permission
 
 init(autoreset=True)
 
 
 def main():
-    add_numbers_tool = Tool(function=add_numbers, permission=ToolPermission.LOW)
+    add_numbers_tool = Tool(function=add_numbers, permission=ToolPermission.HIGH)
     file_reader_tool = Tool(function=read_file, permission=ToolPermission.LOW)
     list_directory_tool = Tool(function=list_directory, permission=ToolPermission.LOW)
 
@@ -19,7 +20,7 @@ def main():
     system_prompt = compose_prompt([MAIN_SYSTEM_PROMPT])
     print(system_prompt)
     context = Context(system_prompt)
-
+    ollama_provider = OllamaProvider(model="gemma4:e2b")
     while True:
         user_input = input("> ")
         if (
@@ -30,22 +31,26 @@ def main():
             break
         context.add_user_message(user_input)
         showing_thinking = False
-        for response in run_agent(context, OllamaProvider(model="gemma4:e2b"), tools):
+        showing_content = False
+        for response in run_agent(context, ollama_provider, tools, ask_tool_permission):
+            # Match examples/ttt.py: stream thinking and content separately; both may
+            # appear in the same chunk, so use two `if`s, not if/elif.
             if response.thinking:
-                print(
-                    Fore.YELLOW + "\rThinking ... " + Style.RESET_ALL,
-                    end="",
-                    flush=True,
-                )
-                showing_thinking = True
-            else:
-                if showing_thinking:
-                    print("\r\033[K", end="", flush=True)
-                    showing_thinking = False
-                print(
-                    Fore.GREEN + response.content + Style.RESET_ALL, end="", flush=True
-                )
-        print("\n")
+                if not showing_thinking:
+                    print("\n", flush=True)
+                    print(Fore.YELLOW + "Agent: Thinking ... ", end="", flush=True)
+                    showing_thinking = True
+                print(Fore.YELLOW + response.thinking, end="", flush=True)
+
+            if response.content:
+                if not showing_content:
+                    print("\n", flush=True)
+                    print(Fore.GREEN + "Agent: ", end="", flush=True)
+                    showing_content = True
+                print(Fore.GREEN + response.content, end="", flush=True)
+                showing_thinking = False
+
+        print(Style.RESET_ALL + "\n")
 
 
 if __name__ == "__main__":

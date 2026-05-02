@@ -4,7 +4,7 @@ from src.agent_core.tools.executor import sequential_executor
 from src.agent_core.providers.base import AssistantMessage
 from src.agent_core.tools.tool import Tool
 
-from typing import Generator
+from typing import Callable, Generator
 
 
 class State:
@@ -18,7 +18,10 @@ class State:
 
 
 def run_agent(
-    context: Context, provider: BaseProvider, tools: list[Tool]
+    context: Context,
+    provider: BaseProvider,
+    tools: list[Tool],
+    ask_tool_permission: Callable[[str, dict], bool],
 ) -> Generator[AssistantMessage, None, None]:
     state = State(context, provider, tools)
 
@@ -40,11 +43,9 @@ def run_agent(
         state.context.add_assistant_message(response)
 
         if tools_called:
-            for tool_result in sequential_executor(tools_called):
+            for tool_result in sequential_executor(tools_called, ask_tool_permission):
                 state.context.add_tool_message(tool_result)
             # state.context.add_system_message(TOOL_RESULT_PROMPT_TEMPLATE)
 
         else:
             state.continue_running = False
-
-    return state.context.messages
