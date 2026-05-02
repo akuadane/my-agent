@@ -111,6 +111,7 @@ def play_game():
 
     ollama_provider = OllamaProvider(model="gemma4:e2b")
     while game.winner() is None and not game.is_draw():
+        
         game.display()
         if game.current_player == "O":
             user_input = input("> ")
@@ -125,7 +126,6 @@ def play_game():
             context.add_user_message(
                 f"User moved to row {user_move[0]}, column {user_move[1]}, sign O"
             )
-            context.add_system_message(f"The board is as follows: {str(game)}")
 
         else:
             showing_thinking = False
@@ -147,7 +147,7 @@ def play_game():
                     showing_thinking = False
 
         print(Fore.RESET + "\n")
-
+        context.add_system_message(f"The board is as follows: {str(game)}")
 
 if __name__ == "__main__":
     play_game()
