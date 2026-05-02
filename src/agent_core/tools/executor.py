@@ -10,8 +10,11 @@ def sequential_executor(
     for tool, kwargs in tools:
         if tool.permission == ToolPermission.HIGH:
             if not ask_tool_permission(tool.name, kwargs):
-                yield ToolResultMessage(tool_name=tool.name, content=f"Tool {tool.name} was not allowed to be used by the user.")
-                continue 
+                yield ToolResultMessage(
+                    tool_name=tool.name,
+                    content=f"Tool {tool.name} was not allowed to be used by the user.",
+                )
+                continue
         result = tool.execute(**kwargs)
         yield ToolResultMessage(tool_name=tool.name, content=str(result))
 

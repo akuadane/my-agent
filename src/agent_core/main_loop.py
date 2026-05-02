@@ -18,7 +18,10 @@ class State:
 
 
 def run_agent(
-    context: Context, provider: BaseProvider, tools: list[Tool], ask_tool_permission: Callable[[str, dict], bool]
+    context: Context,
+    provider: BaseProvider,
+    tools: list[Tool],
+    ask_tool_permission: Callable[[str, dict], bool],
 ) -> Generator[AssistantMessage, None, None]:
     state = State(context, provider, tools)
 
@@ -46,4 +49,3 @@ def run_agent(
 
         else:
             state.continue_running = False
-

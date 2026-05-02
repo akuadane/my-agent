@@ -111,7 +111,6 @@ def play_game():
 
     ollama_provider = OllamaProvider(model="gemma4:e2b")
     while game.winner() is None and not game.is_draw():
-        
         game.display()
         if game.current_player == "O":
             user_input = input("> ")
@@ -148,6 +147,7 @@ def play_game():
 
         print(Fore.RESET + "\n")
         context.add_system_message(f"The board is as follows: {str(game)}")
+
 
 if __name__ == "__main__":
     play_game()

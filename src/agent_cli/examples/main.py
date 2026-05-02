@@ -11,7 +11,6 @@ from src.agent_cli.policy import ask_tool_permission
 init(autoreset=True)
 
 
-
 def main():
     add_numbers_tool = Tool(function=add_numbers, permission=ToolPermission.HIGH)
     file_reader_tool = Tool(function=read_file, permission=ToolPermission.LOW)
@@ -23,7 +22,6 @@ def main():
     context = Context(system_prompt)
     ollama_provider = OllamaProvider(model="gemma4:e2b")
     while True:
-        
         user_input = input("> ")
         if (
             user_input.lower() == "exit"
@@ -39,14 +37,14 @@ def main():
             # appear in the same chunk, so use two `if`s, not if/elif.
             if response.thinking:
                 if not showing_thinking:
-                    print('\n', flush=True)
+                    print("\n", flush=True)
                     print(Fore.YELLOW + "Agent: Thinking ... ", end="", flush=True)
                     showing_thinking = True
                 print(Fore.YELLOW + response.thinking, end="", flush=True)
 
             if response.content:
                 if not showing_content:
-                    print('\n', flush=True)
+                    print("\n", flush=True)
                     print(Fore.GREEN + "Agent: ", end="", flush=True)
                     showing_content = True
                 print(Fore.GREEN + response.content, end="", flush=True)
