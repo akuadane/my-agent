@@ -1,5 +1,6 @@
 from src.agent_core.tools.tool import Tool, ToolPermission
 from src.agent_core.providers.base import ToolResultMessage
+from concurrent.futures import ThreadPoolExecutor
 from typing import Callable, Generator
 
 
@@ -8,6 +9,7 @@ def sequential_executor(
 ) -> Generator[ToolResultMessage, None, None]:
 
     for tool, kwargs in tools:
+        print("Executing tool: ", tool.name)
         if tool.permission == ToolPermission.HIGH:
             if not ask_tool_permission(tool.name, kwargs):
                 yield ToolResultMessage(
@@ -19,6 +21,9 @@ def sequential_executor(
         yield ToolResultMessage(tool_name=tool.name, content=str(result))
 
 
-# TODO : Implement the parallel executor
 def parallel_executor(tools: list[(Tool, dict)]) -> list[str]:
-    pass
+    if not tools:
+        return []
+
+    with ThreadPoolExecutor(max_workers=len(tools)) as executor:
+        return list(executor.map(lambda tool_call: str(tool_call[0].execute(**tool_call[1])), tools))

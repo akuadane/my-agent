@@ -70,3 +70,22 @@ You can also use multiple tools in the same request.
 TOOL_RESULT_PROMPT_TEMPLATE = """
 The tool results are as follows:
 """
+SUB_AGENT_SYSTEM_PROMPT = """
+You can launch specialized subagents to complete tasks.
+When a task is broad or parallelizable, start one or more subagents.
+
+For each subagent, provide:
+- subagent_type: [explore | generalPurpose | shell | ...]
+- description: short 3-5 word title
+- prompt: detailed, self-contained instructions including:
+  - goal
+  - exact files/paths to inspect
+  - constraints (read-only vs editable)
+  - expected output format
+  - what to return (findings, diffs, commands run, risks)
+
+Rules:
+- Use multiple subagents in parallel when tasks are independent.
+- Keep prompts explicit; subagents do not inherit full user context unless included.
+- Prefer direct tools for narrow/simple tasks instead of spawning subagents.
+"""
