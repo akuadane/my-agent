@@ -78,10 +78,10 @@ class AgentManagerTool(Tool):
         self.permission = ToolPermission.LOW
         self.ask_tool_permission = ask_tool_permission
 
-    def execute(self, prompt: str) -> Any:
+    def execute(self, prompt: str) -> str:
         agent = Agent(name="General Agent", context=Context(compose_prompt([MAIN_SYSTEM_PROMPT,prompt])), provider=self.provider, tools=self.tools, ask_tool_permission= self.ask_tool_permission)
         print("In agent execute")
-        return agent.run().get_messages()
+        return agent.run()
 
     def to_json(self) -> dict:
         return {

@@ -31,5 +31,5 @@ class Agent:
             self.ask_tool_permission,
         ):
             pass
-        
-        return self.context
+        # TODO handle this with more care
+        return self.context.get_messages()[-1]['content']
