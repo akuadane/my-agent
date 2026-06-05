@@ -2,7 +2,7 @@ from enum import Enum
 import inspect
 from typing import Callable, Any
 
-from src.agent_cli.policy import ask_tool_permission
+from src.agent_cli.policy import ask_tool_permission_cli
 from src.agent_core.context.context import Context
 from src.agent_core.providers.base import BaseProvider
 from src.agent_core.agent import Agent

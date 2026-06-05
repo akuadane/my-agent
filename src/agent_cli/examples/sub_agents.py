@@ -1,6 +1,6 @@
 from colorama import Fore, Style, init
 
-from src.agent_cli.policy import ask_tool_permission
+from src.agent_cli.policy import ask_tool_permission_cli
 from src.agent_core.context.context import Context
 from src.agent_core.main_loop import run_agent
 from src.agent_core.prompts.composer import compose_prompt
@@ -22,7 +22,7 @@ def main():
     sub_agent_tool = AgentManagerTool(
         provider=ollama_provider,
         tools=[*base_tools, add_numbers_tool],
-        ask_tool_permission=ask_tool_permission,
+        ask_tool_permission=ask_tool_permission_cli,
     )
 
     tools = [*base_tools, sub_agent_tool]
@@ -41,7 +41,7 @@ def main():
         context.add_user_message(user_input)
         showing_thinking = False
         showing_content = False
-        for response in run_agent(context, ollama_provider, tools, ask_tool_permission):
+        for response in run_agent(context, ollama_provider, tools, ask_tool_permission_cli):
             if response.thinking:
                 if not showing_thinking:
                     print("\n", flush=True)

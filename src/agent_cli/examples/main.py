@@ -6,7 +6,7 @@ from src.agent_core.main_loop import run_agent
 from src.agent_core.tools.tool import Tool, ToolPermission
 from src.agent_tools.tools import add_numbers, read_file, list_directory
 from colorama import Fore, Style, init
-from src.agent_cli.policy import ask_tool_permission
+from src.agent_cli.policy import ask_tool_permission_cli
 
 init(autoreset=True)
 
@@ -32,7 +32,7 @@ def main():
         context.add_user_message(user_input)
         showing_thinking = False
         showing_content = False
-        for response in run_agent(context, ollama_provider, tools, ask_tool_permission):
+        for response in run_agent(context, ollama_provider, tools, ask_tool_permission_cli):
             # Match examples/ttt.py: stream thinking and content separately; both may
             # appear in the same chunk, so use two `if`s, not if/elif.
             if response.thinking:
