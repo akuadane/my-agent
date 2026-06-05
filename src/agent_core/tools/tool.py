@@ -2,7 +2,6 @@ from enum import Enum
 import inspect
 from typing import Callable, Any
 
-from src.agent_cli.policy import ask_tool_permission_cli
 from src.agent_core.context.context import Context
 from src.agent_core.providers.base import BaseProvider
 from src.agent_core.agent import Agent
@@ -70,8 +69,14 @@ class Tool:
             },
         }
 
+
 class AgentManagerTool(Tool):
-    def __init__(self, provider: BaseProvider, tools: list[Tool], ask_tool_permission: Callable[[str, dict], bool]):
+    def __init__(
+        self,
+        provider: BaseProvider,
+        tools: list[Tool],
+        ask_tool_permission: Callable[[str, dict], bool],
+    ):
         self.name = "addition_agent"
         self.provider = provider
         self.tools = tools
@@ -79,7 +84,13 @@ class AgentManagerTool(Tool):
         self.ask_tool_permission = ask_tool_permission
 
     def execute(self, prompt: str) -> str:
-        agent = Agent(name="General Agent", context=Context(compose_prompt([MAIN_SYSTEM_PROMPT,prompt])), provider=self.provider, tools=self.tools, ask_tool_permission= self.ask_tool_permission)
+        agent = Agent(
+            name="General Agent",
+            context=Context(compose_prompt([MAIN_SYSTEM_PROMPT, prompt])),
+            provider=self.provider,
+            tools=self.tools,
+            ask_tool_permission=self.ask_tool_permission,
+        )
         print("In agent execute")
         return agent.run()
 

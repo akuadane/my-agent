@@ -32,7 +32,9 @@ def main():
         context.add_user_message(user_input)
         showing_thinking = False
         showing_content = False
-        for response in run_agent(context, ollama_provider, tools, ask_tool_permission_cli):
+        for response in run_agent(
+            context, ollama_provider, tools, ask_tool_permission_cli
+        ):
             # Match examples/ttt.py: stream thinking and content separately; both may
             # appear in the same chunk, so use two `if`s, not if/elif.
             if response.thinking:

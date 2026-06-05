@@ -26,4 +26,8 @@ def parallel_executor(tools: list[(Tool, dict)]) -> list[str]:
         return []
 
     with ThreadPoolExecutor(max_workers=len(tools)) as executor:
-        return list(executor.map(lambda tool_call: str(tool_call[0].execute(**tool_call[1])), tools))
+        return list(
+            executor.map(
+                lambda tool_call: str(tool_call[0].execute(**tool_call[1])), tools
+            )
+        )

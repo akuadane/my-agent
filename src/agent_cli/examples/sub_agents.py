@@ -41,7 +41,9 @@ def main():
         context.add_user_message(user_input)
         showing_thinking = False
         showing_content = False
-        for response in run_agent(context, ollama_provider, tools, ask_tool_permission_cli):
+        for response in run_agent(
+            context, ollama_provider, tools, ask_tool_permission_cli
+        ):
             if response.thinking:
                 if not showing_thinking:
                     print("\n", flush=True)

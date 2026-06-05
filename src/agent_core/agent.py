@@ -32,4 +32,4 @@ class Agent:
         ):
             pass
         # TODO handle this with more care
-        return self.context.get_messages()[-1]['content']
+        return self.context.get_messages()[-1]["content"]
