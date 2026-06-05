@@ -80,3 +80,4 @@ def read_file(path: str, max_read_chars: int = MAX_READ_CHARS) -> str:
         )
 
     return contents
+
