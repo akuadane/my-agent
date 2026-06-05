@@ -23,3 +23,5 @@ def test_ollama_provider_stream_output(cxt,ollama):
     
     assert last_message is not None
     assert last_message.done is True
+
+# TODO : test with different inputs such as stream True/False after implementation.
