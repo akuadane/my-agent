@@ -1,8 +1,7 @@
 from .base import BaseProvider
-from typing import Any
+from typing import Any, Generator
 from llmx import TextGenerationConfig
 import requests
-from typing import Generator
 from src.agent_core.providers.base import AssistantMessage
 import json
 
@@ -18,14 +17,23 @@ class OllamaProvider(BaseProvider):
         messages: list[dict[str, Any]],
         config: TextGenerationConfig,
         tools: list[dict[str, Any]],
-    ) -> Generator[AssistantMessage, None, None]:
+        stream: bool = True,
+    ) -> Generator[AssistantMessage, None, None] | AssistantMessage:
         payload = {
             "model": self.model,
             "messages": messages,
-            # "config": config.model_dump(),
-            "stream": True,
+            "options": {k: v for k, v in config if v is not None} if config else {},
+            "stream": stream,
             "tools": tools,
         }
+        if stream:
+            return self._generate_stream(payload)
+        else:
+            return self._generate_one(payload)
+
+    def _generate_stream(
+        self, payload: dict
+    ) -> Generator[AssistantMessage, None, None]:
         assistant_content = ""
         thinking_content = ""
         final_tool_calls = []
@@ -68,5 +76,29 @@ class OllamaProvider(BaseProvider):
             content=assistant_content,
             thinking=thinking_content,
             tool_calls=final_tool_calls,
+            done=True,
+        )
+
+    def _generate_one(self, payload: dict) -> AssistantMessage:
+        data = requests.post(f"{self.base_url}/api/chat", json=payload).json()
+        message = data.get("message", {})
+        tool_calls = []
+        function_call = message.get("tool_calls", None)
+        if function_call:
+            function_data = function_call[0].get("function", {})
+            tool_calls = [
+                {
+                    "type": "function",
+                    "function": {
+                        "index": function_call[0].get("index", 0),
+                        "name": function_data.get("name", ""),
+                        "arguments": function_data.get("arguments", {}),
+                    },
+                }
+            ]
+        return AssistantMessage(
+            content=message.get("content", ""),
+            thinking=message.get("thinking", ""),
+            tool_calls=tool_calls,
             done=True,
         )

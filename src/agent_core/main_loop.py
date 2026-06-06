@@ -3,6 +3,7 @@ from src.agent_core.providers.base import BaseProvider
 from src.agent_core.tools.executor import sequential_executor
 from src.agent_core.providers.base import AssistantMessage
 from src.agent_core.tools.tool import Tool
+from llmx import TextGenerationConfig
 
 from typing import Callable, Generator
 
@@ -22,13 +23,14 @@ def run_agent(
     provider: BaseProvider,
     tools: list[Tool],
     ask_tool_permission: Callable[[str, dict], bool],
+    config: TextGenerationConfig = TextGenerationConfig(),
 ) -> Generator[AssistantMessage, None, None]:
     state = State(context, provider, tools)
 
     while state.continue_running:
         tools_called = []
         for response in state.provider.generate(
-            state.context.get_messages(), None, state.tools_json
+            state.context.get_messages(), config, state.tools_json
         ):
             if not response.done:
                 yield response
