@@ -1,7 +1,7 @@
 from colorama import Fore, Style
 
 
-def ask_tool_permission(tool_name: str, arguments: dict) -> bool:
+def ask_tool_permission_cli(tool_name: str, arguments: dict) -> bool:
     print(Style.RESET_ALL, flush=True)
     print("\n", flush=True)
     print(
