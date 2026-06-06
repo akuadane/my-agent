@@ -1,11 +1,29 @@
 from abc import ABC, abstractmethod
-from typing import Any
-from llmx import TextGenerationConfig, TextGenerator, TextGenerationResponse, Message
+from typing import Any, Generator, Literal, overload
+from llmx import TextGenerationConfig, TextGenerator, Message
 
 
 class BaseProvider(TextGenerator, ABC):
     def count_tokens(self, messages: str) -> int:
         return len(messages.split(" "))
+
+    @overload
+    def generate(
+        self,
+        messages: list[dict[str, Any]],
+        config: TextGenerationConfig,
+        tools: list[dict[str, Any]],
+        stream: Literal[True],
+    ) -> Generator["AssistantMessage", None, None]: ...
+
+    @overload
+    def generate(
+        self,
+        messages: list[dict[str, Any]],
+        config: TextGenerationConfig,
+        tools: list[dict[str, Any]],
+        stream: Literal[False],
+    ) -> "AssistantMessage": ...
 
     @abstractmethod
     def generate(
@@ -13,7 +31,8 @@ class BaseProvider(TextGenerator, ABC):
         messages: list[dict[str, Any]],
         config: TextGenerationConfig,
         tools: list[dict[str, Any]],
-    ) -> TextGenerationResponse:
+        stream: bool = True,
+    ) -> "Generator[AssistantMessage, None, None] | AssistantMessage":
         pass
 
 
