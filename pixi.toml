@@ -8,9 +8,12 @@ version = "0.1.0"
 [tasks]
 format = "ruff format ."
 lint = "ruff check ."
+setup = "pre-commit install"
+
 
 [dependencies]
 python = "3.11.*"
+pre-commit = ">=4.6.0,<5"
 
 [pypi-dependencies]
 pytest = ">=9.0.3, <10"

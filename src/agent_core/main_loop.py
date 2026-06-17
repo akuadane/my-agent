@@ -24,22 +24,21 @@ def run_agent(
     tools: list[Tool],
     ask_tool_permission: Callable[[str, dict], bool],
     config: TextGenerationConfig = TextGenerationConfig(),
-    stream: bool = True
+    stream: bool = True,
 ) -> Generator[AssistantMessage, None, None] | AssistantMessage:
-    
     state = State(context, provider, tools)
 
     def _run_stream() -> Generator[AssistantMessage, None, None]:
         while state.continue_running:
             tools_called = []
             response = None
-           
+
             for response in state.provider.generate(
                 state.context.get_messages(), config, state.tools_json, stream=True
             ):
                 if not response.done:
                     yield response
-            
+
             for tool_call in response.tool_calls:
                 tools_called.append(
                     (
@@ -51,7 +50,9 @@ def run_agent(
             state.context.add_assistant_message(response)
 
             if tools_called:
-                for tool_result in sequential_executor(tools_called, ask_tool_permission):
+                for tool_result in sequential_executor(
+                    tools_called, ask_tool_permission
+                ):
                     state.context.add_tool_message(tool_result)
                 # state.context.add_system_message(TOOL_RESULT_PROMPT_TEMPLATE)
 
@@ -59,11 +60,10 @@ def run_agent(
                 state.continue_running = False
 
     def _run_one() -> AssistantMessage:
-
         while state.continue_running:
             tools_called = []
             response = None
-            
+
             response = state.provider.generate(
                 state.context.get_messages(), config, state.tools_json, stream=False
             )
@@ -79,16 +79,16 @@ def run_agent(
             state.context.add_assistant_message(response)
 
             if tools_called:
-                for tool_result in sequential_executor(tools_called, ask_tool_permission):
+                for tool_result in sequential_executor(
+                    tools_called, ask_tool_permission
+                ):
                     state.context.add_tool_message(tool_result)
                 # state.context.add_system_message(TOOL_RESULT_PROMPT_TEMPLATE)
 
             else:
                 state.continue_running = False
-    
 
-    if stream: 
+    if stream:
         return _run_stream()
 
     return _run_one()
-        
