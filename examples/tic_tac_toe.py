@@ -127,7 +127,7 @@ def play_game():
         else:
             showing_thinking = False
             showing_content = False
-            for response in run_agent(context, ollama_provider, tools):
+            for response in run_agent(context, ollama_provider, tools, None):
                 if response.thinking:
                     if not showing_thinking:
                         print(Fore.YELLOW + "Thinking ... ", end="", flush=True)
