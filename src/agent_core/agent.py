@@ -24,12 +24,12 @@ class Agent:
     def run(self) -> Context:
         from src.agent_core.main_loop import run_agent
 
-        for _ in run_agent(
+        run_agent(
             self.context,
             self.provider,
             self.tools,
             self.ask_tool_permission,
-        ):
-            pass
+            stream=False
+        )
         # TODO handle this with more care
         return self.context.get_messages()[-1]["content"]
