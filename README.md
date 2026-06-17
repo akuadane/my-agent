@@ -24,6 +24,7 @@ ollama pull gemma4:e2b
 git clone https://github.com/akuadane/my-agent
 cd my-agent
 pixi install
+pixi run setup
 ```
 
 ## Running the examples
