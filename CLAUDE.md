@@ -11,36 +11,47 @@ A Python agentic AI framework for building autonomous agents that use LLMs for d
 This project uses [Pixi](https://pixi.sh) for environment/dependency management (not pip or poetry).
 
 ```bash
-pixi install          # Install dependencies
+pixi install          # Install dependencies (includes editable install of agentlib)
 pixi run format       # Format with ruff
 pixi run lint         # Lint with ruff
-pixi run pytest       # Run tests (if configured)
+pixi run pytest       # Run tests
 ```
 
 **Running examples** (requires a running Ollama instance with `gemma4:e2b` or similar):
 ```bash
-pixi run python -m src.agent_cli.examples.main        # Basic agent with file/math tools
-pixi run python -m src.agent_cli.examples.sub_agents  # Main agent spawning sub-agents
-pixi run python -m src.agent_cli.examples.ttt         # Tic-tac-toe game
+pixi run python examples/basic_agent.py    # Basic agent with file/math tools
+pixi run python examples/sub_agents.py     # Main agent spawning sub-agents
+pixi run python examples/tic_tac_toe.py    # Tic-tac-toe game
 ```
 
 ## Architecture
 
+The package is `agentlib`, installed as an editable package via `pyproject.toml`. Import root: `from agentlib import ...`
+
 ### Core Components
 
-**`src/agent_core/`** — The engine
-- [agent.py](src/agent_core/agent.py) — `Agent` class: ties together context, provider, tools, and permission callback; `agent.run()` returns the final string response
-- [main_loop.py](src/agent_core/main_loop.py) — `run_agent()` generator that drives the agentic loop: call provider → extract tool calls → execute → add results to context → repeat until no tool calls remain
-- [context/context.py](src/agent_core/context/context.py) — Conversation history (system prompt + messages)
-- [providers/base.py](src/agent_core/providers/base.py) — `BaseProvider` ABC, `AssistantMessage`, `ToolResultMessage`; only `OllamaProvider` is fully implemented
-- [tools/tool.py](src/agent_core/tools/tool.py) — `Tool` wraps a Python function with name/description/permission level; introspects function signature to build JSON schema; `AgentManagerTool` wraps a sub-agent as a tool
-- [tools/executor.py](src/agent_core/tools/executor.py) — `sequential_executor` and `parallel_executor` for running tool calls
+**`src/agentlib/core/`** — The engine
+- [agent.py](src/agentlib/core/agent.py) — `Agent` class: ties together context, provider, tools, and permission callback; `agent.run()` returns the final string response
+- [loop.py](src/agentlib/core/loop.py) — `run_agent()` generator that drives the agentic loop: call provider → extract tool calls → execute → add results to context → repeat until no tool calls remain
+- [context.py](src/agentlib/core/context.py) — Conversation history (system prompt + messages)
+- [prompts/](src/agentlib/core/prompts/) — `prompts.py` (system prompt constants) and `composer.py` (prompt concatenation)
 
-**`src/agent_cli/`** — CLI layer
-- [policy.py](src/agent_cli/policy.py) — `ask_tool_permission()`: prompts the user in the terminal for HIGH/MEDIUM permission tools
+**`src/agentlib/providers/`** — LLM backends (primary extension point)
+- [base.py](src/agentlib/providers/base.py) — `BaseProvider` ABC, `AssistantMessage`, `ToolResultMessage`
+- [ollama.py](src/agentlib/providers/ollama.py) — `OllamaProvider`: the only fully implemented provider
+- `anthropic.py`, `openai.py`, `local.py` — empty stubs
 
-**`src/agent_tools/`** — Concrete tool implementations
-- [tools.py](src/agent_tools/tools.py) — `add_numbers`, `list_directory`, `read_file`
+**`src/agentlib/tools/`** — Tool framework + builtins
+- [tool.py](src/agentlib/tools/tool.py) — `Tool` wraps a Python function with name/description/permission level; introspects function signature to build JSON schema; `AgentManagerTool` wraps a sub-agent as a tool
+- [executor.py](src/agentlib/tools/executor.py) — `sequential_executor` and `parallel_executor` for running tool calls
+- [builtin/basic.py](src/agentlib/tools/builtin/basic.py) — `add_numbers`, `list_directory`, `read_file`
+
+**`src/agentlib/cli/`** — CLI layer
+- [policy.py](src/agentlib/cli/policy.py) — `ask_tool_permission_cli()`: prompts the user in the terminal for HIGH permission tools
+
+**`examples/`** — Runnable demos (not shipped in the package)
+
+**`tests/`** — Mirrors the package layout: `tests/core/`, `tests/providers/`, `tests/tools/`, `tests/cli/`
 
 ### Data Flow
 
@@ -55,7 +66,7 @@ User input
 
 ### Tool Permission Levels
 
-Tools declare a `PermissionLevel` (LOW, MEDIUM, HIGH). The `ask_tool_permission` callback (injected at construction time) decides whether to auto-approve or prompt the user. This allows the same agent engine to work in both interactive CLI and headless contexts.
+Tools declare a `ToolPermission` (LOW, MEDIUM, HIGH). The `ask_tool_permission` callback (injected at construction time) decides whether to auto-approve or prompt the user. This allows the same agent engine to work in both interactive CLI and headless contexts.
 
 ### Sub-Agents
 
@@ -63,4 +74,4 @@ Tools declare a `PermissionLevel` (LOW, MEDIUM, HIGH). The `ask_tool_permission`
 
 ### Provider Abstraction
 
-`BaseProvider` defines the interface; `OllamaProvider` is the only complete implementation. `OpenAIProvider`, `AnthropicProvider`, and `LocalProvider` are empty stubs.
+`BaseProvider` defines the interface; `OllamaProvider` is the only complete implementation. `OpenAIProvider`, `AnthropicProvider`, and `LocalProvider` are empty stubs in `src/agentlib/providers/`.

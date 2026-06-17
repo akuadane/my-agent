@@ -8,6 +8,7 @@ version = "0.1.0"
 [tasks]
 format = "ruff format ."
 lint = "ruff check ."
+pytest = "pytest"
 setup = "pre-commit install"
 
 
@@ -21,3 +22,5 @@ ruff = ">=0.15.11, <0.16"
 mypy = ">=1.20.2, <2"
 llmx = ">=0.0.21a0, <0.0.21a1"
 colorama = ">=0.4.6, <0.5"
+hatchling = ">=1.27.0, <2"
+agentlib = { path = ".", editable = true }
