@@ -5,7 +5,7 @@ from llmx import TextGenerationConfig
 from agentlib.core.context import Context
 from agentlib.providers.base import AssistantMessage, BaseProvider
 from agentlib.tools.executor import sequential_executor
-from agentlib.tools.tool import Tool
+from agentlib.tools.tool import InvalidTool, Tool
 
 
 class State:
@@ -25,7 +25,7 @@ def run_agent(
     ask_tool_permission: Callable[[str, dict], bool],
     config: TextGenerationConfig = TextGenerationConfig(),
     stream: bool = True,
-) -> Generator[AssistantMessage, None, None] | AssistantMessage:
+) -> Generator[AssistantMessage, None, None] | None:
     state = State(context, provider, tools)
 
     def _run_stream() -> Generator[AssistantMessage, None, None]:
@@ -40,6 +40,12 @@ def run_agent(
                     yield response
 
             for tool_call in response.tool_calls:
+                tool_name = tool_call["function"]["name"]
+
+                if tool_name not in state.tools_map:
+                    tools_called.append((InvalidTool(tool_name), {}))
+                    continue
+
                 tools_called.append(
                     (
                         state.tools_map[tool_call["function"]["name"]],
@@ -57,7 +63,7 @@ def run_agent(
             else:
                 state.continue_running = False
 
-    def _run_one() -> AssistantMessage:
+    def _run_one():
         while state.continue_running:
             tools_called = []
             response = None
