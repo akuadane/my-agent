@@ -1,4 +1,5 @@
 import inspect
+from abc import ABC
 from enum import Enum
 from typing import Any, Callable
 
@@ -15,11 +16,22 @@ class ToolPermission(Enum):
     HIGH = "high"
 
 
-class Tool:
-    def __init__(self, function: Callable, permission: ToolPermission):
-        self.name = function.__name__
+class BaseTool(ABC):
+    def __init__(self, name: str, function: Callable, permission: ToolPermission):
+        self.name = name
         self.function = function
         self.permission = permission
+
+
+class InvalidTool(BaseTool):
+    def __init__(self, name: str):
+        super().__init__(name=name, function=None, permission=None)
+        self.name = name
+
+
+class Tool(BaseTool):
+    def __init__(self, function: Callable, permission: ToolPermission):
+        super().__init__(name=function.__name__, function=function, permission=permission)
 
     def execute(self, **kwargs) -> Any:
         return self.function(**kwargs)
