@@ -1,9 +1,7 @@
 from typing import Literal
 
-from colorama import Fore
-
+import agentlib.cli.utilis as cli_utils
 from agentlib.core.context import Context
-from agentlib.core.loop import run_agent
 from agentlib.core.prompts.composer import compose_prompt
 from agentlib.core.prompts.prompts import MAIN_SYSTEM_PROMPT
 from agentlib.providers.ollama import OllamaProvider
@@ -125,25 +123,13 @@ def play_game():
             )
 
         else:
-            showing_thinking = False
-            showing_content = False
-            for response in run_agent(context, ollama_provider, tools, None):
-                if response.thinking:
-                    if not showing_thinking:
-                        print(Fore.YELLOW + "Thinking ... ", end="", flush=True)
-                        showing_thinking = True
-
-                    print(Fore.YELLOW + response.thinking, end="", flush=True)
-
-                if response.content:
-                    if not showing_content:
-                        print("\n")
-                        print(Fore.GREEN + "Content ... ", end="", flush=True)
-                        showing_content = True
-                    print(Fore.GREEN + response.content, end="", flush=True)
-                    showing_thinking = False
-
-        print(Fore.RESET + "\n")
+            cli_utils.display_agent_work(
+                name="Main",
+                context=context,
+                provider=ollama_provider,
+                tools=tools,
+                ask_tool_permission_cli=None,
+            )
         context.add_system_message(f"The board is as follows: {str(game)}")
 
 

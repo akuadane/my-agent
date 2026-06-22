@@ -26,7 +26,8 @@ def sequential_executor(
                     continue
             result = tool.execute(**kwargs)
             yield ToolResultMessage(tool_name=tool.name, content=str(result))
-        except Exception:
+        except Exception as e:
+            print(e)
             yield ToolResultMessage(
                 tool_name=tool.name, content="Something went wrong while executing this tool"
             )

@@ -73,7 +73,7 @@ You can also use multiple tools in the same request.
 TOOL_RESULT_PROMPT_TEMPLATE = """
 The tool results are as follows:
 """
-SUB_AGENT_SYSTEM_PROMPT = """
+SUB_AGENT_AVAILABILITY_SYSTEM_PROMPT = """
 You can launch specialized subagents to complete tasks.
 When a task is broad or parallelizable, start one or more subagents.
 

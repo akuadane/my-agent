@@ -47,8 +47,16 @@ class Agent:
         )
 
     def run(self) -> Context:
-        from agentlib.core.loop import run_agent
+        # from agentlib.core.loop import run_agent
+        import agentlib.cli.utilis as cli_utils
 
-        run_agent(self.context, self.provider, self.tools, self.ask_tool_permission, stream=False)
+        # run_agent(self.context, self.provider, self.tools, self.ask_tool_permission, stream=False)
+        cli_utils.display_agent_work(
+            name="Sub",
+            context=self.context,
+            provider=self.provider,
+            tools=self.tools,
+            ask_tool_permission_cli=self.ask_tool_permission,
+        )
         # TODO handle this with more care
         return self.context.get_messages()[-1]["content"]
