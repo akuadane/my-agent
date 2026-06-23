@@ -1,13 +1,10 @@
 import inspect
 from abc import ABC
+from copy import deepcopy
 from enum import Enum
 from typing import Any, Callable
 
 from agentlib.core.agent import Agent
-from agentlib.core.context import Context
-from agentlib.core.prompts.composer import compose_prompt
-from agentlib.core.prompts.prompts import MAIN_SYSTEM_PROMPT
-from agentlib.providers.base import BaseProvider
 
 
 class ToolPermission(Enum):
@@ -17,21 +14,21 @@ class ToolPermission(Enum):
 
 
 class BaseTool(ABC):
-    def __init__(self, name: str, function: Callable, permission: ToolPermission):
+    def __init__(self, name: str):
         self.name = name
-        self.function = function
-        self.permission = permission
 
 
 class InvalidTool(BaseTool):
     def __init__(self, name: str):
-        super().__init__(name=name, function=None, permission=None)
+        super().__init__(name=name)
         self.name = name
 
 
 class Tool(BaseTool):
     def __init__(self, function: Callable, permission: ToolPermission):
-        super().__init__(name=function.__name__, function=function, permission=permission)
+        super().__init__(name=function.__name__)
+        self.function = function
+        self.permission = permission
 
     def execute(self, **kwargs) -> Any:
         return self.function(**kwargs)
@@ -83,35 +80,23 @@ class Tool(BaseTool):
 
 
 class AgentManagerTool(Tool):
-    def __init__(
-        self,
-        provider: BaseProvider,
-        tools: list[Tool],
-        ask_tool_permission: Callable[[str, dict], bool],
-    ):
-        self.name = "addition_agent"
-        self.provider = provider
-        self.tools = tools
+    def __init__(self, template: Agent):
+        self.template = template
+        self.name = template.name
         self.permission = ToolPermission.LOW
-        self.ask_tool_permission = ask_tool_permission
 
     def execute(self, prompt: str) -> str:
-        agent = Agent(
-            name="General Agent",
-            context=Context(compose_prompt([MAIN_SYSTEM_PROMPT, prompt])),
-            provider=self.provider,
-            tools=self.tools,
-            ask_tool_permission=self.ask_tool_permission,
-        )
-        print("In agent execute")
+        agent = deepcopy(self.template)
+        agent.context.add_user_message(prompt)
+
         return agent.run()
 
     def to_json(self) -> dict:
         return {
             "type": "function",
             "function": {
-                "name": self.name,
-                "description": "Creates new agents to accomplish addition tasks.",
+                "name": self.template.name,
+                "description": self.template.desc,
                 "parameters": {
                     "type": "object",
                     "required": ["prompt"],

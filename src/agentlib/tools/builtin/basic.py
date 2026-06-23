@@ -28,16 +28,17 @@ def list_directory(path: str) -> str:
     Returns:
         A newline-separated list of entries, or an error/status message.
     """
+    print("path")
     abs_path = os.path.abspath(path)
 
     if not os.path.exists(abs_path):
-        return f"Path not found: {abs_path}"
+        return f"Path not found: {path}"
     if not os.path.isdir(abs_path):
-        return f"Not a directory: {abs_path}"
+        return f"Not a directory: {path}"
 
     entries = sorted(entry for entry in os.listdir(abs_path) if not entry.startswith("."))
     if not entries:
-        return f"Directory is empty: {abs_path}"
+        return f"Directory is empty: {path}"
 
     formatted_entries = []
     for entry in entries:

@@ -1,10 +1,11 @@
-from colorama import Fore, Style, init
+from colorama import init
 
+import agentlib.cli.utilis as cli_utils
 from agentlib.cli.policy import ask_tool_permission_cli
+from agentlib.core.agent import Agent
 from agentlib.core.context import Context
-from agentlib.core.loop import run_agent
 from agentlib.core.prompts.composer import compose_prompt
-from agentlib.core.prompts.prompts import MAIN_SYSTEM_PROMPT, SUB_AGENT_SYSTEM_PROMPT
+from agentlib.core.prompts.prompts import MAIN_SYSTEM_PROMPT, SUB_AGENT_AVAILABILITY_SYSTEM_PROMPT
 from agentlib.providers.ollama import OllamaProvider
 from agentlib.tools.builtin.basic import add_numbers, list_directory, read_file
 from agentlib.tools.tool import AgentManagerTool, Tool, ToolPermission
@@ -20,13 +21,19 @@ def main():
     base_tools = [file_reader_tool, list_directory_tool]
     ollama_provider = OllamaProvider(model="gemma4:e2b")
     sub_agent_tool = AgentManagerTool(
-        provider=ollama_provider,
-        tools=[*base_tools, add_numbers_tool],
-        ask_tool_permission=ask_tool_permission_cli,
+        Agent(
+            name="Addition Calculator",
+            desc="""This agent has addition tools. 
+                    Use it when you want to subdivide a task or calculate addition.""",
+            context=Context(MAIN_SYSTEM_PROMPT),
+            provider=ollama_provider,
+            tools=[*base_tools, add_numbers_tool],
+            ask_tool_permission=ask_tool_permission_cli,
+        )
     )
 
     tools = [*base_tools, sub_agent_tool]
-    system_prompt = compose_prompt([MAIN_SYSTEM_PROMPT, SUB_AGENT_SYSTEM_PROMPT])
+    system_prompt = compose_prompt([MAIN_SYSTEM_PROMPT, SUB_AGENT_AVAILABILITY_SYSTEM_PROMPT])
     print(system_prompt)
     context = Context(system_prompt)
 
@@ -39,25 +46,14 @@ def main():
         ):
             break
         context.add_user_message(user_input)
-        showing_thinking = False
-        showing_content = False
-        for response in run_agent(context, ollama_provider, tools, ask_tool_permission_cli):
-            if response.thinking:
-                if not showing_thinking:
-                    print("\n", flush=True)
-                    print(Fore.YELLOW + "Agent: Thinking ... ", end="", flush=True)
-                    showing_thinking = True
-                print(Fore.YELLOW + response.thinking, end="", flush=True)
 
-            if response.content:
-                if not showing_content:
-                    print("\n", flush=True)
-                    print(Fore.GREEN + "Agent: ", end="", flush=True)
-                    showing_content = True
-                print(Fore.GREEN + response.content, end="", flush=True)
-                showing_thinking = False
-
-        print(Style.RESET_ALL + "\n")
+        cli_utils.display_agent_work(
+            name="Main",
+            context=context,
+            provider=ollama_provider,
+            tools=tools,
+            ask_tool_permission_cli=ask_tool_permission_cli,
+        )
 
 
 if __name__ == "__main__":
