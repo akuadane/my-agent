@@ -83,8 +83,17 @@ def speak_agent_work(
     process.start()
 
     buffer = ""
+    removed_thinking = False
     for response in run_agent(context, provider, tools, ask_tool_permission_cli):
+        if response.thinking:
+            # \r returns to line start, \033[K clears to end of line, end=""
+            # keeps the cursor on the same line so the next print overwrites it.
+            print("\rThinking ...", end="", flush=True)
         if response.content:
+            if not removed_thinking:
+                print("\r\033[K", end="", flush=True)  # erase the "Thinking ..." line
+                removed_thinking = True
+
             buffer += response.content
             sentences = re.split(r"(?<=[.!?])\s+", buffer)
             if len(sentences) > 1:
