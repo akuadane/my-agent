@@ -21,7 +21,7 @@ def main():
     system_prompt = compose_prompt([MAIN_SYSTEM_PROMPT])
     print(system_prompt)
     context = Context(system_prompt)
-    ollama_provider = OllamaProvider(model="gemma4:e2b")
+    ollama_provider = OllamaProvider(model="qwen3.5:4b")
     while True:
         user_input = input("> ")
         if (
@@ -31,8 +31,7 @@ def main():
         ):
             break
         context.add_user_message(user_input)
-        cli_utils.display_agent_work(
-            name="Main",
+        cli_utils.speak_agent_work(
             context=context,
             provider=ollama_provider,
             tools=tools,

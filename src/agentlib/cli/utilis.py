@@ -25,7 +25,7 @@ def display_agent_work(
                 showing_thinking = True
             print(Fore.YELLOW + response.thinking, end="", flush=True)
 
-        if response.content:
+        elif response.content:
             if not showing_content:
                 print("\n", flush=True)
                 print(Fore.GREEN + f"({name}) Talking: ", end="", flush=True)
@@ -34,3 +34,59 @@ def display_agent_work(
             showing_thinking = False
 
     print(Style.RESET_ALL + "\n")
+
+
+def speak_agent_work(
+    context: Context,
+    provider: BaseProvider,
+    tools: List[Tool],
+    ask_tool_permission_cli: ToolPermission,
+):
+    import queue
+    import re
+    import subprocess
+    import threading
+
+    speech_queue: queue.Queue = queue.Queue()
+
+    def speaker():
+        end = False
+
+        while not end:
+            items = [speech_queue.get()]
+            if items[0] is None:
+                break
+
+            try:
+                while True:
+                    item = speech_queue.get_nowait()
+
+                    if item is None:
+                        end = True
+                        break
+
+                    items.append(item)
+            except queue.Empty:
+                pass
+
+            text = " ".join(items)
+            if text.strip():
+                subprocess.run(["say", text], check=False)
+
+    thread = threading.Thread(target=speaker, daemon=True)
+    thread.start()
+
+    buffer = ""
+    for response in run_agent(context, provider, tools, ask_tool_permission_cli):
+        if response.content:
+            buffer += response.content
+            sentences = re.split(r"(?<=[.!?])\s+", buffer)
+            if len(sentences) > 1:
+                speech_queue.put(" ".join(sentences[:-1]))
+                buffer = sentences[-1]
+
+    if buffer.strip():
+        speech_queue.put(buffer)
+
+    speech_queue.put(None)
+    thread.join()
