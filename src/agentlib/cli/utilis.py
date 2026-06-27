@@ -36,45 +36,51 @@ def display_agent_work(
     print(Style.RESET_ALL + "\n")
 
 
+def _speech_worker(speech_queue):
+    """Consume text chunks from the queue and speak them with pyttsx3.
+
+    Runs in its own process so pyttsx3's macOS driver gets a working
+    main-thread run loop.
+    """
+    import queue
+
+    import pyttsx3
+
+    while True:
+        items = [speech_queue.get()]
+        if items[0] is None:
+            break
+
+        try:
+            while True:
+                item = speech_queue.get_nowait()
+                if item is None:
+                    speech_queue.put(None)  # re-signal stop after flushing
+                    break
+                items.append(item)
+        except queue.Empty:
+            pass
+
+        text = " ".join(items).strip()
+        if text:
+            pyttsx3.speak(text)
+
+
 def speak_agent_work(
     context: Context,
     provider: BaseProvider,
     tools: List[Tool],
     ask_tool_permission_cli: ToolPermission,
 ):
-    import queue
+    import multiprocessing
     import re
-    import subprocess
-    import threading
 
-    speech_queue: queue.Queue = queue.Queue()
+    speech_queue: multiprocessing.Queue = multiprocessing.Queue()
 
-    def speaker():
-        end = False
-
-        while not end:
-            items = [speech_queue.get()]
-            if items[0] is None:
-                break
-
-            try:
-                while True:
-                    item = speech_queue.get_nowait()
-
-                    if item is None:
-                        end = True
-                        break
-
-                    items.append(item)
-            except queue.Empty:
-                pass
-
-            text = " ".join(items)
-            if text.strip():
-                subprocess.run(["say", text], check=False)
-
-    thread = threading.Thread(target=speaker, daemon=True)
-    thread.start()
+    # Runs in a separate PROCESS (not a thread) so the engine owns its own
+    # main-thread run loop, which pyttsx3's macOS driver requires.
+    process = multiprocessing.Process(target=_speech_worker, args=(speech_queue,), daemon=True)
+    process.start()
 
     buffer = ""
     for response in run_agent(context, provider, tools, ask_tool_permission_cli):
@@ -89,4 +95,4 @@ def speak_agent_work(
         speech_queue.put(buffer)
 
     speech_queue.put(None)
-    thread.join()
+    process.join()

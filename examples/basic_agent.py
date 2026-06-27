@@ -21,7 +21,7 @@ def main():
     system_prompt = compose_prompt([MAIN_SYSTEM_PROMPT])
     print(system_prompt)
     context = Context(system_prompt)
-    ollama_provider = OllamaProvider(model="qwen3.5:4b")
+    ollama_provider = OllamaProvider(model="gemma4:e2b")
     while True:
         user_input = input("> ")
         if (

@@ -24,3 +24,4 @@ llmx = ">=0.0.21a0, <0.0.21a1"
 colorama = ">=0.4.6, <0.5"
 hatchling = ">=1.27.0, <2"
 agentlib = { path = ".", editable = true }
+pyttsx3 = ">=2.99, <3"
