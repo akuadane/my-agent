@@ -4,7 +4,7 @@ import agentlib.cli.utilis as cli_utils
 from agentlib.cli.policy import ask_tool_permission_cli
 from agentlib.core.context import Context
 from agentlib.core.prompts.composer import compose_prompt
-from agentlib.core.prompts.prompts import MAIN_SYSTEM_PROMPT
+from agentlib.core.prompts.prompts import MAIN_SYSTEM_PROMPT, VOICE_SYSTEM_PROMPT
 from agentlib.providers.ollama import OllamaProvider
 from agentlib.tools.builtin.basic import add_numbers, list_directory, read_file
 from agentlib.tools.tool import Tool, ToolPermission
@@ -18,7 +18,7 @@ def main():
     list_directory_tool = Tool(function=list_directory, permission=ToolPermission.LOW)
 
     tools = [add_numbers_tool, file_reader_tool, list_directory_tool]
-    system_prompt = compose_prompt([MAIN_SYSTEM_PROMPT])
+    system_prompt = compose_prompt([MAIN_SYSTEM_PROMPT, VOICE_SYSTEM_PROMPT])
     print(system_prompt)
     context = Context(system_prompt)
     ollama_provider = OllamaProvider(model="gemma4:e2b")
@@ -31,8 +31,7 @@ def main():
         ):
             break
         context.add_user_message(user_input)
-        cli_utils.display_agent_work(
-            name="Main",
+        cli_utils.speak_agent_work(
             context=context,
             provider=ollama_provider,
             tools=tools,

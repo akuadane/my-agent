@@ -25,7 +25,7 @@ def display_agent_work(
                 showing_thinking = True
             print(Fore.YELLOW + response.thinking, end="", flush=True)
 
-        if response.content:
+        elif response.content:
             if not showing_content:
                 print("\n", flush=True)
                 print(Fore.GREEN + f"({name}) Talking: ", end="", flush=True)
@@ -34,3 +34,74 @@ def display_agent_work(
             showing_thinking = False
 
     print(Style.RESET_ALL + "\n")
+
+
+def _speech_worker(speech_queue):
+    """Consume text chunks from the queue and speak them with pyttsx3.
+
+    Runs in its own process so pyttsx3's macOS driver gets a working
+    main-thread run loop.
+    """
+    import queue
+
+    import pyttsx3
+
+    while True:
+        items = [speech_queue.get()]
+        if items[0] is None:
+            break
+
+        try:
+            while True:
+                item = speech_queue.get_nowait()
+                if item is None:
+                    speech_queue.put(None)  # re-signal stop after flushing
+                    break
+                items.append(item)
+        except queue.Empty:
+            pass
+
+        text = " ".join(items).strip()
+        if text:
+            pyttsx3.speak(text)
+
+
+def speak_agent_work(
+    context: Context,
+    provider: BaseProvider,
+    tools: List[Tool],
+    ask_tool_permission_cli: ToolPermission,
+):
+    import multiprocessing
+    import re
+
+    speech_queue: multiprocessing.Queue = multiprocessing.Queue()
+
+    # Runs in a separate PROCESS (not a thread) so the engine owns its own
+    # main-thread run loop, which pyttsx3's macOS driver requires.
+    process = multiprocessing.Process(target=_speech_worker, args=(speech_queue,), daemon=True)
+    process.start()
+
+    buffer = ""
+    removed_thinking = False
+    for response in run_agent(context, provider, tools, ask_tool_permission_cli):
+        if response.thinking:
+            # \r returns to line start, \033[K clears to end of line, end=""
+            # keeps the cursor on the same line so the next print overwrites it.
+            print("\rThinking ...", end="", flush=True)
+        if response.content:
+            if not removed_thinking:
+                print("\r\033[K", end="", flush=True)  # erase the "Thinking ..." line
+                removed_thinking = True
+
+            buffer += response.content
+            sentences = re.split(r"(?<=[.!?])\s+", buffer)
+            if len(sentences) > 1:
+                speech_queue.put(" ".join(sentences[:-1]))
+                buffer = sentences[-1]
+
+    if buffer.strip():
+        speech_queue.put(buffer)
+
+    speech_queue.put(None)
+    process.join()
